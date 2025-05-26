@@ -11,6 +11,7 @@ import {
 import { hover } from './hover'
 import { keyboard, keyboardCleanup } from './keyboard'
 import { screenshot } from './screenshot'
+import { screenshotMatcher } from './screenshotMatcher'
 import { selectOptions } from './select'
 import { tab } from './tab'
 import { type } from './type'
@@ -35,4 +36,5 @@ export default {
   __vitest_dragAndDrop: dragAndDrop as typeof dragAndDrop,
   __vitest_hover: hover as typeof hover,
   __vitest_cleanup: keyboardCleanup as typeof keyboardCleanup,
+  __vitest_screenshotMatcher: screenshotMatcher as typeof screenshotMatcher,
 }
