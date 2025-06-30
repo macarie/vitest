@@ -93,6 +93,8 @@ export function resolveOptions(
     throw new Error('`resolveOptions` has to be used in a test file')
   }
 
+  console.log({ name, testName })
+
   const resolvedOptions = deepMerge<GlobalOptions>(
     Object.create(null),
     defaultOptions,
@@ -136,6 +138,8 @@ export function resolveOptions(
     testName: sanitize(testName, false),
     browserName: context.project.config.browser.name,
   } satisfies Parameters<GlobalOptions['resolveDiffPath']>[0]
+
+  console.log({ resolvePathData, referencePath: resolvedOptions.resolveScreenshotPath(resolvePathData) })
 
   return {
     codec: getCodec(extension),

@@ -210,6 +210,8 @@ async function getStableScreenshots({
     screenshotOptions,
   } satisfies Parameters<typeof takeDecodedScreenshot>[0]
 
+  console.log({ screenshotArgument })
+
   let retries = 0
 
   let decodedBaseline = reference

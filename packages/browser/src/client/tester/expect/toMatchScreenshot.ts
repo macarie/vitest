@@ -42,6 +42,8 @@ export default async function toMatchScreenshot(
     ? nameOrOptions
     : `${this.currentTestName} ${counter.current}`
 
+  console.log({ counterName, name })
+
   const result = await
   getBrowserState().commands.triggerCommand<ScreenshotMatcherOutput>(
     '__vitest_screenshotMatcher',

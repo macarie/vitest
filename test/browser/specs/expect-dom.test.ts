@@ -5,7 +5,7 @@ const testNames = Object.keys(import.meta.glob('../fixtures/expect-dom/*.test.ts
   eager: false,
 })).map(path => path.slice('../fixtures/expect-dom/'.length))
 
-test('expect-dom works correctly', async () => {
+test.only('expect-dom works correctly', async () => {
   const { stderr, stdout } = await runBrowserTests({
     root: './fixtures/expect-dom',
   })
