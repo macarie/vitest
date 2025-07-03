@@ -34,7 +34,8 @@
     "ui:dev": "npm -C packages/ui run dev:client",
     "ui:test": "npm -C packages/ui run test:run",
     "test:browser:webdriverio": "pnpm -C test/browser run test:webdriverio",
-    "test:browser:playwright": "pnpm -C test/browser run test:playwright"
+    "test:browser:playwright": "pnpm -C test/browser run test:playwright",
+    "test:visual": "pnpm -C test/browser run test:ci-change"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.2",
