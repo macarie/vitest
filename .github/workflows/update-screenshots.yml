@@ -1,0 +1,132 @@
+name: Update Visual Regression Screenshots
+
+on:
+  workflow_dispatch:
+
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.cache/ms-playwright
+  AUTHOR_NAME: 'github-actions[bot]'
+  AUTHOR_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
+  COMMIT_MESSAGE: |
+    test: update visual regression screenshots
+
+    Co-authored-by: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+
+jobs:
+  update-screenshots:
+    runs-on: ubuntu-24.04
+
+    # do not push directly to default branch
+    if: github.ref_name != github.event.repository.default_branch
+
+    # cancel running jobs for the same branch when starting another one
+    concurrency:
+      group: visual-regression-screenshots@${{ github.ref_name }}
+      cancel-in-progress: true
+
+    permissions:
+      # required to push changes
+      contents: write
+
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          # use a PAT if you need to trigger other workflows
+          # token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ env.AUTHOR_NAME }}"
+          git config --global user.email "${{ env.AUTHOR_EMAIL }}"
+
+      # add any setup steps necessary when checking out your repository
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 24
+
+      # - name: Install dependencies
+      #   run: npm ci
+
+      - uses: ./.github/actions/setup-and-cache
+
+      - name: Install
+        run: pnpm i
+
+      - name: Build
+        run: pnpm run build
+
+      # Playwright can install the browsers on its own
+      # make sure to pin its version so that it won't update the browser versions
+      - name: Install Playwright Browsers
+        # run: npx --no playwright install --with-deps --only-shell
+        run: pnpm exec playwright install --with-deps --only-shell
+
+      # for Webdriverio you can use
+      # - uses: browser-actions/setup-chrome@v1
+      #   with:
+      #     chrome-version: 120
+      # for other browsers, check out the org's repositories: https://github.com/browser-actions
+
+      - name: Update Visual Regression Screenshots
+        run: |
+          # ====================================
+          # PLACEHOLDER: Replace this with your actual screenshot update command
+          # ====================================
+          # Example of command for visual regression testing:
+          npm run test:visual --update
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          CHANGED_FILES=$(git status -uall --porcelain | awk '{print $2}')
+          if [ "${CHANGED_FILES:+x}" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+
+            # capture list of changed files
+            echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+            # count changed files
+            echo "changed_count=$(echo "$CHANGED_FILES" | wc -l)" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+            echo "changed_count=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git add -A
+          git commit -m "${{ env.COMMIT_MESSAGE }}"
+
+      - name: Push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git push origin ${{ github.ref_name }}
+
+      - name: Summary
+        run: |
+          if [[ "${{ steps.check_changes.outputs.changes }}" == "true" ]]; then
+            echo "### 📸 Visual Regression Screenshots Updated" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Successfully updated **${{ steps.check_changes.outputs.changed_count }}** screenshot(s) on \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### Changed Files:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.check_changes.outputs.changed_files }}" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ The updated screenshots have been committed and pushed. Your visual regression baseline is now up to date!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ℹ️ No Screenshot Updates Required" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The visual regression test command ran successfully but no screenshots needed updating." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All screenshots are already up to date! 🎉" >> $GITHUB_STEP_SUMMARY
+          fi
