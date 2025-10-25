@@ -1,4 +1,4 @@
-import type { File, TaskEventPack, TaskResultPack, TestAnnotation } from '@vitest/runner'
+import type { File, TaskEventPack, TaskResultPack, TestAnnotation, TestArtifact } from '@vitest/runner'
 import type { SerializedError } from '@vitest/utils'
 import type { IncomingMessage } from 'node:http'
 import type { ViteDevServer } from 'vite'
@@ -192,6 +192,16 @@ export class WebSocketReporter implements Reporter {
 
     this.clients.forEach((client) => {
       client.onTestAnnotate?.(testCase.id, annotation)?.catch?.(noop)
+    })
+  }
+
+  async onTestCaseAttachArtifact(testCase: TestCase, artifact: TestArtifact): Promise<void> {
+    if (this.clients.size === 0) {
+      return
+    }
+
+    this.clients.forEach((client) => {
+      client.onTestAttachArtifact?.(testCase.id, artifact)?.catch?.(noop)
     })
   }
 

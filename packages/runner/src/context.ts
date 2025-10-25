@@ -7,6 +7,7 @@ import type {
   Test,
   TestAnnotation,
   TestAnnotationLocation,
+  TestArtifact,
   TestAttachment,
   TestContext,
   WriteableTestContext,
@@ -216,18 +217,72 @@ export function createTestContext(
     }
 
     if (typeof type === 'object') {
-      return recordAsyncAnnotation(
+      return recordAsyncOperation(
         test,
         annotate(message, location, undefined, type),
       )
     }
     else {
-      return recordAsyncAnnotation(
+      return recordAsyncOperation(
         test,
         annotate(message, location, type, attachment),
       )
     }
   }) as TestContext['annotate']
+
+  async function attachArtifact(
+    artifact: TestArtifact,
+  ) {
+    for (const attachment of artifact.attachments) {
+      if (attachment.body == null && !attachment.path) {
+        throw new TypeError(`Test artifact attachment requires "body" or "path" to be set. Both are missing.`)
+      }
+      if (attachment.body && attachment.path) {
+        throw new TypeError(`Test artifact attachment requires only one of "body" or "path" to be set. Both are specified.`)
+      }
+
+      if (attachment.body instanceof Uint8Array) {
+        attachment.body = encodeUint8Array(attachment.body)
+      }
+    }
+
+    await finishSendTasksUpdate(runner)
+
+    const resolvedArtifact = await runner.onTestArtifact?.(test, artifact) ?? artifact
+
+    test.artifacts.push(resolvedArtifact)
+
+    return resolvedArtifact
+  }
+
+  context.attachArtifact = ((artifact) => {
+    if (test.result && test.result.state !== 'run') {
+      throw new Error(`Cannot attach test artifacts outside of the test run. The test "${test.name}" finished running with the "${test.result.state}" state already.`)
+    }
+
+    const stack = findTestFileStackTrace(
+      test.file.filepath,
+      new Error('STACK_TRACE').stack!,
+    )
+
+    let location: undefined | TestAnnotationLocation
+
+    if (stack) {
+      location = {
+        file: stack.file,
+        line: stack.line,
+        column: stack.column,
+      }
+    }
+
+    return recordAsyncOperation(
+      test,
+      attachArtifact({
+        ...artifact,
+        location,
+      }),
+    )
+  }) as TestContext['attachArtifact']
 
   context.onTestFailed = (handler, timeout) => {
     test.onFailed ||= []
@@ -332,7 +387,7 @@ function encodeUint8Array(bytes: Uint8Array): string {
   return base64
 }
 
-function recordAsyncAnnotation<T>(
+function recordAsyncOperation<T>(
   test: Test,
   promise: Promise<T>,
 ): Promise<T> {

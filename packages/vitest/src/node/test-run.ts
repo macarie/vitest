@@ -4,6 +4,7 @@ import type {
   TaskResultPack,
   TaskUpdateEvent,
   TestAnnotation,
+  TestArtifact,
   TestAttachment,
 } from '@vitest/runner'
 import type { TaskEventData } from '@vitest/runner/types/tasks'
@@ -62,12 +63,36 @@ export class TestRun {
     assert(task && entity, `Entity must be found for task ${task?.name || testId}`)
     assert(entity.type === 'test', `Annotation can only be added to a test, instead got ${entity.type}`)
 
-    await this.resolveTestAttachment(entity, annotation)
+    await this.resolveTestAttachment(entity, annotation.attachment, annotation.message)
 
     entity.task.annotations.push(annotation)
 
     await this.vitest.report('onTestCaseAnnotate', entity, annotation)
     return annotation
+  }
+
+  async attachArtifact(testId: string, artifact: TestArtifact): Promise<TestArtifact> {
+    const task = this.vitest.state.idMap.get(testId)
+    const entity = task && this.vitest.state.getReportedEntity(task)
+
+    assert(task && entity, `Entity must be found for task ${task?.name || testId}`)
+    assert(entity.type === 'test', `Test artifacts can only be attached to a test, instead got ${entity.type}`)
+
+    await Promise.all(
+      artifact.attachments.map(
+        (attachment, index) => this.resolveTestAttachment(
+          entity,
+          attachment,
+          `${artifact.title}-${artifact.source}-${artifact.type}-${attachment.name ?? index}`,
+        ),
+      ),
+    )
+
+    entity.task.artifacts.push(artifact)
+
+    await this.vitest.report('onTestCaseAttachArtifact', entity, artifact)
+
+    return artifact
   }
 
   async updated(update: TaskResultPack[], events: TaskEventPack[]): Promise<void> {
@@ -232,9 +257,8 @@ export class TestRun {
     }
   }
 
-  private async resolveTestAttachment(test: TestCase, annotation: TestAnnotation): Promise<TestAttachment | undefined> {
+  private async resolveTestAttachment(test: TestCase, attachment: TestAttachment | undefined, filename: string): Promise<TestAttachment | undefined> {
     const project = test.project
-    const attachment = annotation.attachment
     if (!attachment) {
       return attachment
     }
@@ -244,7 +268,7 @@ export class TestRun {
       const hash = createHash('sha1').update(currentPath).digest('hex')
       const newPath = resolve(
         project.config.attachmentsDir,
-        `${sanitizeFilePath(annotation.message)}-${hash}${extname(currentPath)}`,
+        `${sanitizeFilePath(filename)}-${hash}${extname(currentPath)}`,
       )
       if (!existsSync(project.config.attachmentsDir)) {
         await mkdir(project.config.attachmentsDir, { recursive: true })

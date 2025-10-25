@@ -1,4 +1,4 @@
-import type { File, TaskResultPack, TestAnnotation } from '@vitest/runner'
+import type { File, TaskResultPack, TestAnnotation, TestArtifact } from '@vitest/runner'
 import type { RunnerTaskEventPack } from 'vitest'
 import type {
   CollectorInfo,
@@ -9,7 +9,7 @@ import type {
 import { useRafFn } from '@vueuse/core'
 import { reactive } from 'vue'
 import { runCollapseAllTask, runCollapseNode } from '~/composables/explorer/collapse'
-import { annotateTest, collectTestsTotalData, preparePendingTasks, runCollect, runLoadFiles } from '~/composables/explorer/collector'
+import { annotateTest, attachTestArtifact, collectTestsTotalData, preparePendingTasks, runCollect, runLoadFiles } from '~/composables/explorer/collector'
 import { runExpandAll, runExpandNode } from '~/composables/explorer/expand'
 import { runFilter } from '~/composables/explorer/filter'
 import {
@@ -82,6 +82,16 @@ export class ExplorerTree {
 
   annotateTest(testId: string, annotation: TestAnnotation) {
     annotateTest(testId, annotation)
+    if (!this.onTaskUpdateCalled) {
+      clearTimeout(this.resumeEndRunId)
+      this.onTaskUpdateCalled = true
+      this.collect(true, false, false)
+      this.rafCollector.resume()
+    }
+  }
+
+  attachTestArtifact(testId: string, artifact: TestArtifact) {
+    attachTestArtifact(testId, artifact)
     if (!this.onTaskUpdateCalled) {
       clearTimeout(this.resumeEndRunId)
       this.onTaskUpdateCalled = true

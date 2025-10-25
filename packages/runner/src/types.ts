@@ -44,6 +44,8 @@ export type {
   TestAnnotation,
   TestAnnotationLocation,
   TestAPI,
+  TestArtifact,
+  TestArtifactAttachment,
   TestAttachment,
   TestContext,
   TestFunction,

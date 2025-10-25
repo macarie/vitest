@@ -54,6 +54,9 @@ export function createClient(url: string, options: VitestClientOptions = {}): Vi
     onTestAnnotate(testId, annotation) {
       handlers.onTestAnnotate?.(testId, annotation)
     },
+    onTestAttachArtifact(testId, artifact) {
+      handlers.onTestAttachArtifact?.(testId, artifact)
+    },
     onSpecsCollected(specs) {
       specs?.forEach(([config, file]) => {
         ctx.state.clearFiles({ config }, [file])

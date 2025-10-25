@@ -110,6 +110,9 @@ export function createMethodsRPC(project: TestProject, options: MethodsOptions =
     async onTaskAnnotate(testId, annotation) {
       return vitest._testRun.annotate(testId, annotation)
     },
+    async onTaskAttachArtifact(testId, artifact) {
+      return vitest._testRun.attachArtifact(testId, artifact)
+    },
     async onTaskUpdate(packs, events) {
       if (options.collect) {
         vitest.state.updateTasks(packs)

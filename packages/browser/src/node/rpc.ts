@@ -153,6 +153,9 @@ export function setupBrowserRpc(globalServer: ParentBrowserProject, defaultMocke
         async onTaskAnnotate(id, annotation) {
           return vitest._testRun.annotate(id, annotation)
         },
+        async onTaskAttachArtifact(testId, artifact) {
+          return vitest._testRun.attachArtifact(testId, artifact)
+        },
         async onTaskUpdate(method, packs, events) {
           if (method === 'collect') {
             vitest.state.updateTasks(packs)

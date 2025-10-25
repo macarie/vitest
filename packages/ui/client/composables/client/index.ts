@@ -6,6 +6,7 @@ import type {
   RunnerTestFile,
   SerializedConfig,
   TestAnnotation,
+  TestArtifact,
 } from 'vitest'
 import type { BrowserRunnerState } from '../../../types'
 import { createFileTask } from '@vitest/runner/utils'
@@ -35,6 +36,9 @@ export const client = (function createVitestClient() {
       handlers: {
         onTestAnnotate(testId: string, annotation: TestAnnotation) {
           explorerTree.annotateTest(testId, annotation)
+        },
+        onTestAttachArtifact(testId: string, artifact: TestArtifact) {
+          explorerTree.attachTestArtifact(testId, artifact)
         },
         onTaskUpdate(packs: RunnerTaskResultPack[], events: RunnerTaskEventPack[]) {
           explorerTree.resumeRun(packs, events)

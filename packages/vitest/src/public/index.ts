@@ -104,6 +104,7 @@ export type {
   TaskState,
   TestAnnotation,
   TestAPI,
+  TestArtifact,
   TestContext,
   TestFunction,
   TestOptions,

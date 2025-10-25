@@ -6,6 +6,7 @@ import type {
   Suite as RunnerTestSuite,
   TaskMeta,
   TestAnnotation,
+  TestArtifact,
 } from '@vitest/runner'
 import type { SerializedError, TestError } from '@vitest/utils'
 import type { TestProject } from '../project'
@@ -184,6 +185,10 @@ export class TestCase extends ReportedTaskImplementation {
    */
   public annotations(): ReadonlyArray<TestAnnotation> {
     return [...this.task.annotations]
+  }
+
+  public artifacts(): ReadonlyArray<TestArtifact> {
+    return [...this.task.artifacts]
   }
 
   /**

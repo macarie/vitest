@@ -192,6 +192,7 @@ export type TaskResultPack = [
 
 export interface TaskEventData {
   annotation?: TestAnnotation | undefined
+  artifact?: TestArtifact | undefined
 }
 
 export type TaskEventPack = [
@@ -222,6 +223,7 @@ export type TaskUpdateEvent
     | 'after-hook-start'
     | 'after-hook-end'
     | 'test-annotation'
+    | 'test-artifact'
 
 export interface Suite extends TaskBase {
   type: 'suite'
@@ -283,6 +285,7 @@ export interface Test<ExtraContext = object> extends TaskPopulated {
    * An array of custom annotations.
    */
   annotations: TestAnnotation[]
+  artifacts: TestArtifact[]
 }
 
 export interface TestAttachment {
@@ -302,6 +305,21 @@ export interface TestAnnotation {
   type: string
   location?: TestAnnotationLocation
   attachment?: TestAttachment
+}
+
+export interface TestArtifactAttachment extends TestAttachment {
+  name?: string
+  metadata?: Record<string, unknown>
+}
+
+export interface TestArtifact {
+  title: string
+  message?: string
+  source: string
+  type: string
+  attachments: TestArtifactAttachment[]
+  location?: TestAnnotationLocation
+  metadata?: Record<string, unknown>
 }
 
 export type Task = Test | Suite | File
@@ -705,6 +723,14 @@ export interface TestContext {
   readonly annotate: {
     (message: string, type?: string, attachment?: TestAttachment): Promise<TestAnnotation>
     (message: string, attachment?: TestAttachment): Promise<TestAnnotation>
+  }
+
+  /**
+   * Attach a test artifact that might be displayed by your reporter.
+   * @internal
+   */
+  readonly attachArtifact: {
+    (artifact: Omit<TestArtifact, 'location'>): Promise<TestArtifact>
   }
 }
 

@@ -73,6 +73,14 @@ export async function resolveTestRunner(
     return overriddenResult || vitestResult
   }
 
+  const originalOnTestArtifact = testRunner.onTestArtifact
+  testRunner.onTestArtifact = async (test, artifact) => {
+    const p = rpc().onTaskAttachArtifact(test.id, artifact)
+    const overriddenResult = await originalOnTestArtifact?.call(testRunner, test, artifact)
+    const vitestResult = await p
+    return overriddenResult || vitestResult
+  }
+
   const originalOnCollectStart = testRunner.onCollectStart
   testRunner.onCollectStart = async (file) => {
     await rpc().onQueued(file)
