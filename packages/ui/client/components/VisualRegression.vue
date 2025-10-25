@@ -6,14 +6,14 @@ import SmallTabsPane from './SmallTabsPane.vue'
 import VisualRegressionImage from './VisualRegressionImage.vue'
 import VisualRegressionSlider from './VisualRegressionSlider.vue'
 
-const props = defineProps<{
+const { artifact } = defineProps<{
   artifact: TestArtifact
 }>()
 
 const groups = computed(() => ({
-  diff: props.artifact.attachments.find(({ name }) => name === 'diff'),
-  reference: props.artifact.attachments.find(({ name }) => name === 'reference'),
-  actual: props.artifact.attachments.find(({ name }) => name === 'actual'),
+  diff: artifact.attachments.find(({ name }) => name === 'diff'),
+  reference: artifact.attachments.find(({ name }) => name === 'reference'),
+  actual: artifact.attachments.find(({ name }) => name === 'actual'),
 }))
 </script>
 

@@ -4,19 +4,19 @@ import { computed, ref, useId } from 'vue'
 import { internalOrExternalUrl } from '~/composables/attachments'
 import VisualRegressionImageContainer from './VisualRegressionImageContainer.vue'
 
-const props = defineProps<{
+const { actual, reference } = defineProps<{
   reference: TestArtifactAttachment
   actual: TestArtifactAttachment
 }>()
 
-const referenceUrl = computed(() => internalOrExternalUrl(props.reference))
-const actualUrl = computed(() => internalOrExternalUrl(props.actual))
+const referenceUrl = computed(() => internalOrExternalUrl(reference))
+const actualUrl = computed(() => internalOrExternalUrl(actual))
 
 const maxWidth = computed(() =>
-  Math.max(props.reference.metadata!.width as number, props.actual.metadata!.width as number),
+  Math.max(reference.metadata!.width as number, actual.metadata!.width as number),
 )
 const maxHeight = computed(() =>
-  Math.max(props.reference.metadata!.height as number, props.actual.metadata!.height as number),
+  Math.max(reference.metadata!.height as number, actual.metadata!.height as number),
 )
 
 const splitPercentage = ref(50)

@@ -25,7 +25,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :id="idFor.tabpanel(props.name, context.id)" role="tabpanel" :aria-labelledby="idFor.tab(props.name, context.id)" :hidden="!isActive" class="max-w-full">
+  <div
+    :id="idFor.tabpanel(props.name, context.id)"
+    role="tabpanel"
+    :aria-labelledby="idFor.tab(props.name, context.id)"
+    :hidden="!isActive" class="max-w-full"
+  >
     <slot />
   </div>
 </template>

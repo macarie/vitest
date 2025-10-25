@@ -4,11 +4,11 @@ import { computed } from 'vue'
 import { internalOrExternalUrl, isExternalAttachment } from '~/composables/attachments'
 import VisualRegressionImageContainer from './VisualRegressionImageContainer.vue'
 
-const props = defineProps<{
+const { attachment } = defineProps<{
   attachment: TestArtifactAttachment
 }>()
 
-const href = computed<string>(() => internalOrExternalUrl(props.attachment))
+const href = computed(() => internalOrExternalUrl(attachment))
 </script>
 
 <template>
@@ -18,9 +18,7 @@ const href = computed<string>(() => internalOrExternalUrl(props.attachment))
       :href="href"
       :referrerPolicy="isExternalAttachment(attachment) ? 'no-referrer' : undefined"
     >
-      <img
-        :src="href"
-      >
+      <img :src="href">
     </a>
   </VisualRegressionImageContainer>
 </template>
