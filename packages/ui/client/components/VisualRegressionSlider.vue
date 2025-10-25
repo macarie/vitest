@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TestArtifactAttachment } from '@vitest/runner'
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { internalOrExternalUrl } from '~/composables/attachments'
 import VisualRegressionImageContainer from './VisualRegressionImageContainer.vue'
 
@@ -21,7 +21,7 @@ const maxHeight = computed(() =>
 
 const splitPercentage = ref(50)
 
-const inputId = crypto.randomUUID()
+const inputId = useId()
 </script>
 
 <template>

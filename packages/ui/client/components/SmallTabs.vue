@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, ref } from 'vue'
+import { provide, ref, useId } from 'vue'
 import { idFor, SMALL_TABS_CONTEXT } from '~/composables/small-tabs'
 
 const activeTab = ref<string | null>(null)
@@ -9,7 +9,7 @@ function setActive(key: string) {
   activeTab.value = key
 }
 
-const id = crypto.randomUUID()
+const id = useId()
 
 provide(SMALL_TABS_CONTEXT, {
   id,
