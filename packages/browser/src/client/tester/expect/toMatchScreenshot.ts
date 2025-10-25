@@ -1,4 +1,5 @@
 import type { AsyncExpectationResult, MatcherState } from '@vitest/expect'
+import type { TestArtifact } from 'vitest'
 import type { ScreenshotMatcherOptions } from '../../../../context'
 import type { ScreenshotMatcherArguments, ScreenshotMatcherOutput } from '../../../shared/screenshotMatcher/types'
 import type { Locator } from '../locators'
@@ -67,23 +68,30 @@ export default async function toMatchScreenshot(
   )
 
   if (result.pass === false && 'context' in currentTest) {
-    const { annotate } = currentTest.context
+    const { attachArtifact } = currentTest.context
 
-    const annotations: ReturnType<typeof annotate>[] = []
+    const attachments: TestArtifact['attachments'] = []
 
     if (result.reference) {
-      annotations.push(annotate('Reference screenshot', { path: result.reference }))
+      attachments.push({ name: 'reference', path: result.reference.path, metadata: result.reference.metadata })
     }
 
     if (result.actual) {
-      annotations.push(annotate('Actual screenshot', { path: result.actual }))
+      attachments.push({ name: 'actual', path: result.actual.path, metadata: result.actual.metadata })
     }
 
     if (result.diff) {
-      annotations.push(annotate('Diff', { path: result.diff }))
+      attachments.push({ name: 'diff', path: result.diff })
     }
 
-    await Promise.all(annotations)
+    if (attachments.length > 0) {
+      await attachArtifact({
+        title: 'Visual Regression',
+        source: 'toMatchScreenshot',
+        type: 'visual-regression',
+        attachments,
+      })
+    }
   }
 
   return {
@@ -96,14 +104,15 @@ export default async function toMatchScreenshot(
             '',
             result.message,
             result.reference
-              ? `\nReference screenshot:\n  ${this.utils.EXPECTED_COLOR(result.reference)}`
+              ? `\nReference screenshot:\n  ${this.utils.EXPECTED_COLOR(result.reference.path)}`
               : null,
             result.actual
-              ? `\nActual screenshot:\n  ${this.utils.RECEIVED_COLOR(result.actual)}`
+              ? `\nActual screenshot:\n  ${this.utils.RECEIVED_COLOR(result.actual.path)}`
               : null,
             result.diff
               ? this.utils.DIM_COLOR(`\nDiff image:\n  ${result.diff}`)
               : null,
+            '',
           ]
             .filter(element => element !== null)
             .join('\n'),
