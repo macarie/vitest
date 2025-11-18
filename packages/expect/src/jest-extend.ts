@@ -6,6 +6,7 @@ import type {
   MatcherState,
   SyncExpectationResult,
 } from './types'
+import { getTestName } from '@vitest/runner/utils' // !!! this is a dev-dep
 import { use, util } from 'chai'
 import { ASYMMETRIC_MATCHERS_OBJECT, JEST_MATCHERS_OBJECT } from './constants'
 import { AsymmetricMatcher } from './jest-asymmetric-matchers'
@@ -40,9 +41,12 @@ function getMatcherState(
     task = undefined
   }
 
+  const currentTestName = task && getTestName(task)
+
   const matcherState: MatcherState = {
     ...getState(expect),
     task,
+    currentTestName,
     customTesters: getCustomEqualityTesters(),
     isNot,
     utils: jestUtils,
