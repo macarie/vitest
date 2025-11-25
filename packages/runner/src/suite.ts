@@ -283,14 +283,23 @@ function parseArguments<T extends (...args: any[]) => any>(
 }
 
 // implementations
-function createSuiteCollector(
-  name: string,
-  factory: SuiteFactory = () => {},
-  mode: RunMode,
-  each?: boolean,
-  suiteOptions?: TestOptions,
-  parentCollectorFixtures?: FixtureItem[],
-) {
+function createSuiteCollector({
+  factory = () => {},
+  file,
+  mode,
+  name,
+  each,
+  parentCollectorFixtures,
+  suiteOptions,
+}: {
+  name: string
+  factory?: SuiteFactory
+  file?: File
+  mode: RunMode
+  each?: boolean
+  suiteOptions?: TestOptions
+  parentCollectorFixtures?: FixtureItem[]
+}) {
   const tasks: (Test | Suite | SuiteCollector)[] = []
 
   let suite!: Suite
@@ -300,20 +309,18 @@ function createSuiteCollector(
   const task = function (name = '', options: TaskCustomOptions = {}) {
     const timeout = options?.timeout ?? runner.config.testTimeout
     const currentSuite = collectorContext.currentSuite?.suite
+    const currentFile = file ?? collectorContext.currentSuite?.file
     const task: Test = {
       id: '',
       name,
-      fullName: createTaskName([
-        currentSuite?.fullName ?? collectorContext.currentSuite?.file?.fullName,
-        name,
-      ]),
+      fullName: createTaskName([(currentSuite ?? currentFile)?.fullName, name]),
       fullTestName: createTaskName([currentSuite?.fullTestName, name]),
       suite: currentSuite,
       each: options.each,
       fails: options.fails,
       context: undefined!,
       type: 'test',
-      file: undefined!,
+      file: currentFile!,
       timeout,
       retry: options.retry ?? runner.config.retry,
       repeats: options.repeats,
@@ -415,6 +422,7 @@ function createSuiteCollector(
     type: 'collector',
     name,
     mode,
+    file,
     suite,
     options: suiteOptions,
     test,
@@ -448,20 +456,18 @@ function createSuiteCollector(
     }
 
     const currentSuite = collectorContext.currentSuite?.suite
+    const currentFile = file ?? collectorContext.currentSuite?.file
 
     suite = {
       id: '',
       type: 'suite',
       name,
-      fullName: createTaskName([
-        currentSuite?.fullName ?? collectorContext.currentSuite?.file?.fullName,
-        name,
-      ]),
+      fullName: createTaskName([(currentSuite ?? currentFile)?.fullName, name]),
       fullTestName: createTaskName([currentSuite?.fullTestName, name]),
       suite: currentSuite,
       mode,
       each,
-      file: undefined!,
+      file: currentFile!,
       shuffle: suiteOptions?.shuffle,
       tasks: [],
       meta: Object.create(null),
@@ -505,12 +511,7 @@ function createSuiteCollector(
       allChildren.push(i.type === 'collector' ? await i.collect(file) : i)
     }
 
-    suite.file = file
     suite.tasks = allChildren
-
-    allChildren.forEach((task) => {
-      task.file = file
-    })
 
     return suite
   }
@@ -577,13 +578,15 @@ function createSuite() {
     options.concurrent = isConcurrent && !isSequential
     options.sequential = isSequential && !isConcurrent
 
-    return createSuiteCollector(
-      formatName(name),
+    return createSuiteCollector({
+      name: formatName(name),
       factory,
+      file: currentSuite?.file,
       mode,
-      this.each,
-      options,
-      currentSuite?.fixtures(),
+      each: this.each,
+      suiteOptions: options,
+      parentCollectorFixtures: currentSuite?.fixtures(),
+    },
     )
   }
 
