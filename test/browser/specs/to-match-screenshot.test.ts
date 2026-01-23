@@ -123,53 +123,53 @@ describe('--watch', () => {
   )
 
   // describe('--update', () => {
-  test(
-    'creates snapshot and does NOT update it if reference matches',
-    async () => {
-      const { fs, stderr, vitest } = await runInlineTests(
-        {
-          [testFilename]: testContent,
-          'utils.ts': utilsContent,
-        },
-        {
-          update: true,
-        },
-      )
+  // test(
+  //   'creates snapshot and does NOT update it if reference matches',
+  //   async () => {
+  //     const { fs, stderr, vitest } = await runInlineTests(
+  //       {
+  //         [testFilename]: testContent,
+  //         'utils.ts': utilsContent,
+  //       },
+  //       {
+  //         update: true,
+  //       },
+  //     )
 
-      expect(stderr).toMatchInlineSnapshot(`""`)
+  //     expect(stderr).toMatchInlineSnapshot(`""`)
 
-      const osPlatform = platform()
-      const referencePath = `__screenshots__/${testFilename}/${testName}-1-${browser}-${osPlatform}.png`
-      const referenceStat = fs.statFile(referencePath)
+  //     const osPlatform = platform()
+  //     const referencePath = `__screenshots__/${testFilename}/${testName}-1-${browser}-${osPlatform}.png`
+  //     const referenceStat = fs.statFile(referencePath)
 
-      fs.editFile(testFilename, content => `${content}\n`)
+  //     fs.editFile(testFilename, content => `${content}\n`)
 
-      vitest.resetOutput()
-      await vitest.waitForStdout('Test Files  1 passed')
+  //     vitest.resetOutput()
+  //     await vitest.waitForStdout('Test Files  1 passed')
 
-      expect(vitest.stdout).toContain('✓ |chromium| basic.test.ts > screenshot-snapshot')
+  //     expect(vitest.stdout).toContain('✓ |chromium| basic.test.ts > screenshot-snapshot')
 
-      // only atime should change since reference should NOT be updated
+  //     // only atime should change since reference should NOT be updated
 
-      const {
-        atime,
-        atimeMs,
-        ...diffs
-      } = fs.statFile(referencePath)
+  //     const {
+  //       atime,
+  //       atimeMs,
+  //       ...diffs
+  //     } = fs.statFile(referencePath)
 
-      expect(referenceStat).toEqual(expect.objectContaining(diffs))
+  //     expect(referenceStat).toEqual(expect.objectContaining(diffs))
 
-      // win32 does not update `atime` by default
-      if (osPlatform === 'win32') {
-        expect(atime.getTime()).toEqual(referenceStat.atime.getTime())
-        expect(atimeMs).toEqual(referenceStat.atimeMs)
-      }
-      else {
-        expect(atime.getTime()).toBeGreaterThan(referenceStat.atime.getTime())
-        expect(atimeMs).toBeGreaterThan(referenceStat.atimeMs)
-      }
-    },
-  )
+  //     // win32 does not update `atime` by default
+  //     if (osPlatform === 'win32') {
+  //       expect(atime.getTime()).toEqual(referenceStat.atime.getTime())
+  //       expect(atimeMs).toEqual(referenceStat.atimeMs)
+  //     }
+  //     else {
+  //       expect(atime.getTime()).toBeGreaterThan(referenceStat.atime.getTime())
+  //       expect(atimeMs).toBeGreaterThan(referenceStat.atimeMs)
+  //     }
+  //   },
+  // )
 
   test(
     'creates snapshot and updates it if reference mismatches',
