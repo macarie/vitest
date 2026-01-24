@@ -99,28 +99,28 @@ describe('--watch', () => {
     },
   )
 
-  // test(
-  //   'creates a reference and fails when changing the DOM content',
-  //   async () => {
-  //     const { fs, stderr, vitest } = await runInlineTests(
-  //       {
-  //         [testFilename]: testContent,
-  //         'utils.ts': utilsContent,
-  //       },
-  //     )
+  test(
+    'creates a reference and fails when changing the DOM content',
+    async () => {
+      const { fs, stderr, vitest } = await runInlineTests(
+        {
+          [testFilename]: testContent,
+          'utils.ts': utilsContent,
+        },
+      )
 
-  //     expect(stderr).toContain(`No existing reference screenshot found; a new one was created. Review it before running tests again.\n\nReference screenshot:`)
+      expect(stderr).toContain(`No existing reference screenshot found; a new one was created. Review it before running tests again.\n\nReference screenshot:`)
 
-  //     fs.editFile(testFilename, content => content.replace(bgColor, '#0ff'))
+      fs.editFile(testFilename, content => content.replace(bgColor, '#0ff'))
 
-  //     vitest.resetOutput()
-  //     await vitest.waitForStdout('Test Files  1 failed')
+      vitest.resetOutput()
+      await vitest.waitForStdout('Test Files  1 failed')
 
-  //     expect(vitest.stdout).toContain('× |chromium| basic.test.ts > screenshot-snapshot')
-  //     expect(vitest.stdout).toContain('Screenshot does not match the stored reference.')
-  //     expect(vitest.stdout).toMatch(/\d+ pixels \(ratio 0.\d{2}\) differ\./)
-  //   },
-  // )
+      expect(vitest.stdout).toContain('× |chromium| basic.test.ts > screenshot-snapshot')
+      expect(vitest.stdout).toContain('Screenshot does not match the stored reference.')
+      expect(vitest.stdout).toMatch(/\d+ pixels \(ratio 0.\d{2}\) differ\./)
+    },
+  )
 
   // describe('--update', () => {
   test(
