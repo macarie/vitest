@@ -99,77 +99,77 @@ describe('--watch', () => {
     },
   )
 
-  test(
-    'creates a reference and fails when changing the DOM content',
-    async () => {
-      const { fs, stderr, vitest } = await runInlineTests(
-        {
-          [testFilename]: testContent,
-          'utils.ts': utilsContent,
-        },
-      )
-
-      expect(stderr).toContain(`No existing reference screenshot found; a new one was created. Review it before running tests again.\n\nReference screenshot:`)
-
-      fs.editFile(testFilename, content => content.replace(bgColor, '#0ff'))
-
-      vitest.resetOutput()
-      await vitest.waitForStdout('Test Files  1 failed')
-
-      expect(vitest.stdout).toContain('× |chromium| basic.test.ts > screenshot-snapshot')
-      expect(vitest.stdout).toContain('Screenshot does not match the stored reference.')
-      expect(vitest.stdout).toMatch(/\d+ pixels \(ratio 0.\d{2}\) differ\./)
-    },
-  )
-
-  // describe('--update', () => {
   // test(
-  //   'creates snapshot and does NOT update it if reference matches',
+  //   'creates a reference and fails when changing the DOM content',
   //   async () => {
   //     const { fs, stderr, vitest } = await runInlineTests(
   //       {
   //         [testFilename]: testContent,
   //         'utils.ts': utilsContent,
   //       },
-  //       {
-  //         update: true,
-  //       },
   //     )
 
-  //     expect(stderr).toMatchInlineSnapshot(`""`)
+  //     expect(stderr).toContain(`No existing reference screenshot found; a new one was created. Review it before running tests again.\n\nReference screenshot:`)
 
-  //     const osPlatform = platform()
-  //     const referencePath = `__screenshots__/${testFilename}/${testName}-1-${browser}-${osPlatform}.png`
-  //     const referenceStat = fs.statFile(referencePath)
-
-  //     fs.editFile(testFilename, content => `${content}\n`)
+  //     fs.editFile(testFilename, content => content.replace(bgColor, '#0ff'))
 
   //     vitest.resetOutput()
-  //     await vitest.waitForStdout('Test Files  1 passed')
+  //     await vitest.waitForStdout('Test Files  1 failed')
 
-  //     expect(vitest.stdout).toContain('✓ |chromium| basic.test.ts > screenshot-snapshot')
-
-  //     // only atime should change since reference should NOT be updated
-
-  //     const {
-  //       atime,
-  //       atimeMs,
-  //       ...diffs
-  //     } = fs.statFile(referencePath)
-
-  //     expect(referenceStat).toEqual(expect.objectContaining(diffs))
-
-  //     // win32 does not update `atime` by default
-  //     if (osPlatform === 'win32') {
-  //       expect(atime.getTime()).toEqual(referenceStat.atime.getTime())
-  //       expect(atimeMs).toEqual(referenceStat.atimeMs)
-  //     }
-  //     else {
-  //       expect(atime.getTime()).toBeGreaterThan(referenceStat.atime.getTime())
-  //       expect(atimeMs).toBeGreaterThan(referenceStat.atimeMs)
-  //     }
+  //     expect(vitest.stdout).toContain('× |chromium| basic.test.ts > screenshot-snapshot')
+  //     expect(vitest.stdout).toContain('Screenshot does not match the stored reference.')
+  //     expect(vitest.stdout).toMatch(/\d+ pixels \(ratio 0.\d{2}\) differ\./)
   //   },
   // )
+
+  // describe('--update', () => {
+  test(
+    'creates snapshot and does NOT update it if reference matches',
+    async () => {
+      const { fs, stderr, vitest } = await runInlineTests(
+        {
+          [testFilename]: testContent,
+          'utils.ts': utilsContent,
+        },
+        {
+          update: true,
+        },
+      )
+
+      expect(stderr).toMatchInlineSnapshot(`""`)
+
+      const osPlatform = platform()
+      const referencePath = `__screenshots__/${testFilename}/${testName}-1-${browser}-${osPlatform}.png`
+      const referenceStat = fs.statFile(referencePath)
+
+      fs.editFile(testFilename, content => `${content}\n`)
+
+      vitest.resetOutput()
+      await vitest.waitForStdout('Test Files  1 passed')
+
+      expect(vitest.stdout).toContain('✓ |chromium| basic.test.ts > screenshot-snapshot')
+
+      // only atime should change since reference should NOT be updated
+
+      const {
+        atime,
+        atimeMs,
+        ...diffs
+      } = fs.statFile(referencePath)
+
+      expect(referenceStat).toEqual(expect.objectContaining(diffs))
+
+      // win32 does not update `atime` by default
+      if (osPlatform === 'win32') {
+        expect(atime.getTime()).toEqual(referenceStat.atime.getTime())
+        expect(atimeMs).toEqual(referenceStat.atimeMs)
+      }
+      else {
+        expect(atime.getTime()).toBeGreaterThan(referenceStat.atime.getTime())
+        expect(atimeMs).toBeGreaterThan(referenceStat.atimeMs)
+      }
+    },
+  )
 
   test(
     'creates snapshot and updates it if reference mismatches',
