@@ -1,0 +1,11 @@
+{
+  "name": "test-flaky",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "workspace:*"
+  }
+}
