@@ -10,6 +10,7 @@ import {
   showNavigationPanel,
   updateBrowserPanel,
 } from '~/composables/navigation'
+import { resizeTracker } from '~/utils/resize-tracker'
 import IconButton from './IconButton.vue'
 
 const sizes: Record<ViewportSize, [width: number, height: number]> = {
@@ -33,16 +34,18 @@ async function changeViewport(name: ViewportSize) {
 const testContainer = useTemplateRef('tester-ui')
 const testContainerRect = ref<DOMRectReadOnly | null>(null)
 
-const observer = new ResizeObserver(([entry]) => {
-  testContainerRect.value = entry.contentRect
-})
+let cleanup: (() => void) | undefined
+
 onMounted(() => {
   if (testContainer.value) {
-    observer.observe(testContainer.value)
+    cleanup = resizeTracker.onResize(testContainer.value, (entry) => {
+      testContainerRect.value = entry.contentRect
+    })
   }
 })
+
 onUnmounted(() => {
-  observer.disconnect()
+  cleanup?.()
 })
 
 const scale = computed(() =>
