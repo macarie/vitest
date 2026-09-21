@@ -5,7 +5,7 @@ import { runInlineTests } from '../../test-utils'
 import { instances, provider } from '../settings'
 
 test('pointer API works with UI enabled', async () => {
-  const { errorTree } = await runInlineTests({
+  const { errorTree, stdout } = await runInlineTests({
     'pointer.test.ts': await readFile(
       resolve(
         import.meta.dirname,
@@ -26,6 +26,7 @@ test('pointer API works with UI enabled', async () => {
     retry: 3,
   })
 
+  console.log(stdout)
   expect(errorTree({ project: true })).toMatchInlineSnapshot(`
     {
       "chromium": {

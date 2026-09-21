@@ -11,7 +11,7 @@ declare module 'vitest' {
 }
 
 // when UI is enabled, automatically set the viewport using this value as the scale target
-const IFRAME_SCALE_TARGET = 0.8
+const IFRAME_SCALE_TARGET = 0.9
 
 beforeAll(async () => {
   if (server.config.browser.ui) {
@@ -20,10 +20,32 @@ beforeAll(async () => {
     const frameWidth = frame.getBoundingClientRect().width
     const containerWidth = container.getBoundingClientRect().width
 
+    console.log({
+      browser: server.config.browser.name,
+      frameWidth,
+      containerWidth,
+      viewport: {
+        width: window.outerWidth,
+        height: window.outerHeight,
+      },
+      innerViewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      },
+    })
+
     await page.viewport(
       Math.round(Math.max(containerWidth, frameWidth) * (1 / IFRAME_SCALE_TARGET)),
       window.innerHeight,
     )
+
+    console.log({
+      browser: server.config.browser.name,
+      innerViewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      },
+    })
   }
 })
 
